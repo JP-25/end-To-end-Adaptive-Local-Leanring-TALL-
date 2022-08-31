@@ -107,7 +107,7 @@ Before running LOCA, you need (1) user embeddings to find local communities and 
 - Torch 1.5 or higher
 
 ## Citation
-Please cite our papaer:
+cited papaer:
 ```
 @inproceedings{DBLP:conf/wsdm/ChoiJLL21,
   author    = {Minjin Choi and
