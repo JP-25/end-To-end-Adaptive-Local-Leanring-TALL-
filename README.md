@@ -1,6 +1,8 @@
 # MOE with MultVAE as Expert
 Inspired by LOCA idea <br>
 
+Original LOCA GitHub link is [here](https://github.com/jin530/LOCA).
+
 This is the official code with preprocessed datasets for the WSDM 2021 paper: [`Local Collaborative Autoencoders`.](https://arxiv.org/abs/2103.16103)
 
 The slides can be found [here](https://www.slideshare.net/ssuser1f2162/local-collaborative-autoencoders-wsdm2021).
