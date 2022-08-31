@@ -1,4 +1,4 @@
-# MOE with MUltiVAE as Expert
+# MOE with MultiVAE as Expert
 Inspired by LOCA idea <br>
 
 This is the official code with preprocessed datasets for the WSDM 2021 paper: [`Local Collaborative Autoencoders`.](https://arxiv.org/abs/2103.16103)
