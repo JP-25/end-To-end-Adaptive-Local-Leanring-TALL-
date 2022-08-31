@@ -1,4 +1,4 @@
-# MOE with MultiVAE as Expert
+# MOE with MultVAE as Expert
 Inspired by LOCA idea <br>
 
 This is the official code with preprocessed datasets for the WSDM 2021 paper: [`Local Collaborative Autoencoders`.](https://arxiv.org/abs/2103.16103)
@@ -94,17 +94,17 @@ Before running LOCA, you need (1) user embeddings to find local communities and 
 
 1. Run single MultVAE and EASE to get user embedding vectors and the global model: 
 
-`python main.py --model_name MultVAE` and `python main.py --model_name EASE`
+`python main.py --model_name MultVAE` 
 
 2. Train LOCA with the specific backbone model:
 
-`python main.py --model_name LOCA_VAE` and `python main.py --model_name LOCA_EASE` 
+`python main.py --model_name LOCA_VAE` and `python main.py --model_name MOE` 
 
 ---
 
 ## Requirements
-- Python 3
-- Torch 1.5
+- Python 3 or higher
+- Torch 1.5 or higher
 
 ## Citation
 Please cite our papaer:
