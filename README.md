@@ -1,4 +1,5 @@
 # LOCA
+Inspired by LOCA idea
 This is the official code with preprocessed datasets for the WSDM 2021 paper: [`Local Collaborative Autoencoders`.](https://arxiv.org/abs/2103.16103)
 
 The slides can be found [here](https://www.slideshare.net/ssuser1f2162/local-collaborative-autoencoders-wsdm2021).
@@ -62,7 +63,7 @@ The slides can be found [here](https://www.slideshare.net/ssuser1f2162/local-col
 </tbody>
 </table>
 <br>
-We use five public benchmark datasets: MovieLens 10M (ML10M), MovieLens 20M (ML20M), Amazon Digital Music (AMusic), Amazon Video Games (AGames), and Yelp 2015 (Yelp) datasets. We convert all explicit ratings to binary values, whether the ratings are observed or missing. For the MovieLens datasets, we did not modify the original data except for binarization. For the Amazon datasets, We removed users with ratings less than
+I used five public benchmark datasets as the original LOCA: MovieLens 10M (ML10M), MovieLens 20M (ML20M), Amazon Digital Music (AMusic), Amazon Video Games (AGames), and Yelp 2015 (Yelp) datasets. We convert all explicit ratings to binary values, whether the ratings are observed or missing. For the MovieLens datasets, we did not modify the original data except for binarization. For the Amazon datasets, We removed users with ratings less than
 10, resulting in 97,439 (Music) and 236,415 (Games) ratings. For the Yelp dataset, we pre-processed Yelp 2015 challenge dataset as in <A href='https://github.com/hexiangnan/sigir16-eals'> Fast Matrix Factorization for Online Recommendation with Implicit Feedback </A>, where users and items with less than 10 interactions are
 removed.
 <br>
