@@ -91,7 +91,7 @@ Yelp 2015: https://github.com/hexiangnan/sigir16-eals/tree/master/data
 
 For example: ```python main.py --model_name MultVAE --lr 0.001```
 
-## Running LOCA
+## Running LOCA and MOE
 Before running LOCA, you need (1) user embeddings to find local communities and (2) the global model to cover users who are not considered by local models. </br>
 
 1. Run single MultVAE and EASE to get user embedding vectors and the global model: 
