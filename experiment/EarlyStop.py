@@ -1,3 +1,4 @@
+import numpy as np
 class EarlyStop:
     def __init__(self, early_stop, early_stop_measure):
         self.endure = 0
@@ -6,6 +7,7 @@ class EarlyStop:
 
         self.best_epoch = None
         self.best_score = None
+        self.best_score_mean = 0
 
     def initialize(self):
         self.best_epoch = None
@@ -20,8 +22,8 @@ class EarlyStop:
             # Early stop if 'every' measure doesn't improve
             # Save individual best score & epoch
             if self.best_score is None:
-                best_score = score
-                self.best_epoch = {m: epoch for m in best_score}
+                self.best_score = score
+                self.best_epoch = {m: epoch for m in self.best_score}
                 not_updated = False
             else:
                 not_updated = True
@@ -30,6 +32,20 @@ class EarlyStop:
                         self.best_score[metric] = score[metric]
                         self.best_epoch[metric] = epoch
                         not_updated = False
+        elif self.early_stop_measure == 'mean':
+            if self.best_score is None:
+                self.best_score = score
+                self.best_epoch = epoch
+                self.best_score_mean = np.mean(list(self.best_score.values()))
+                not_updated = False
+            else:
+                not_updated = True
+                # print(np.mean(list(score.values())))
+                if np.mean(list(score.values())) > self.best_score_mean:
+                    self.best_score = score
+                    self.best_epoch = epoch
+                    self.best_score_mean = np.mean(list(self.best_score.values()))
+                    not_updated = False
         else:
             # Early stop if specific measure doesn't improve
             # Save best score & epoch at the best epoch of the standard measure

@@ -11,3 +11,6 @@ from .LOCA_EASE import LOCA_EASE
 
 # MOE
 from .MOE import MOE
+
+# weighted loss vae
+from .WL import WL

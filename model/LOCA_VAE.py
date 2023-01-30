@@ -12,16 +12,18 @@ from torch.autograd import Variable
 from concurrent import futures
 from base.BaseRecommender import BaseRecommender
 from dataloader.DataBatcher import DataBatcher
-from utils import Logger, set_random_seed
+from utils import Logger #, set_random_seed
 from sklearn.cluster import KMeans
 from collections import OrderedDict
 from sklearn.metrics.pairwise import cosine_distances
 import warnings
 from tqdm import tqdm
+from time import strftime
+from experiment import EarlyStop
 
 warnings.filterwarnings("ignore")
 
-
+# early_stop change
 class LOCA_VAE(BaseRecommender):
     def __init__(self, dataset, model_conf, device):
         super(LOCA_VAE, self).__init__(dataset, model_conf)
@@ -80,6 +82,14 @@ class LOCA_VAE(BaseRecommender):
         return local_best_score, local_train_time
 
     def train_model(self, dataset, evaluator, early_stop, logger, config):
+        similarity_dir = os.path.join(self.dataset.data_dir, self.dataset.data_name, 'mainstream_scores')
+        similarity_file = os.path.join(similarity_dir, 'loca_vae_folder')
+        if not os.path.exists(similarity_file):
+            os.mkdir(similarity_file)
+        path_ = os.path.join(similarity_file, 'loca_vae_scores_' + strftime('%Y%m%d-%H%M'))
+        if not os.path.exists(path_):
+            os.mkdir(path_)
+
         self.base_dir = logger.log_dir
         logger.info("Train coverage : %.5f (Average), %.5f (Max), %.5f (Min)" % (
             np.mean(self.train_coverage), max(self.train_coverage), min(self.train_coverage)))
@@ -104,6 +114,9 @@ class LOCA_VAE(BaseRecommender):
         test_score_str = ['%s=%.4f' % (k, test_score[k]) for k in test_score]
         logger.info(', '.join(test_score_str))
 
+        ndcg_test_all = evaluator.evaluate(self, mean=False)
+        with open(os.path.join(path_, str(self.num_local) + '_loca_vae_test_scores.npy'), 'wb') as f:
+            np.save(f, ndcg_test_all)
         return test_score, total_train_time
 
     def init_local_logger(self, local_num):
@@ -295,6 +308,7 @@ class LocalWrapper(BaseRecommender):
         self.test_weight = test_weight
         self.candidate_users = candidate_users
         self.local_model = self.build_model()
+        self.es = EarlyStop(10, 'mean')
 
         self.optimizer = self.local_model.optimizer
 

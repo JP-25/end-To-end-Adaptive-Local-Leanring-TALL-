@@ -14,15 +14,17 @@ from dataloader import UIRTDatset
 from evaluation import Evaluator
 
 import warnings
+import gc
 
 warnings.filterwarnings("ignore")
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+# os.environ['TF_FORCE_GPU_ALLOW_GROWTH']='true'
 
 if __name__ == '__main__':
     multiprocessing.set_start_method('spawn')
     from experiment import EarlyStop, train_model
-    from utils import Config, Logger, ResultTable, make_log_dir, set_random_seed
+    from utils import Config, Logger, ResultTable, make_log_dir#, set_random_seed
 
     # read configs
     config = Config(main_conf_path='./', model_conf_path='model_config')
@@ -41,8 +43,12 @@ if __name__ == '__main__':
     gpu = config.get_param('Experiment', 'gpu')
     gpu = str(gpu)
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu
+    # torch.cuda.empty_cache()
+    # torch.backends.cudnn.benchmark = True
+    # torch.backends.cudnn.enabled = True
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cpu")
     model_name = config.get_param('Experiment', 'model_name')
 
     # logger
@@ -56,13 +62,12 @@ if __name__ == '__main__':
     dataset = UIRTDatset(**config['Dataset'])
 
     # evaluator
-    # if model_name == 'MF':
-    #     num_users, num_items = dataset.num_user_mf, dataset.num_item_mf
-    #     test_eval_pos, test_eval_target, eval_neg_candidates = dataset.test_data_mf()
-    # else:
     num_users, num_items = dataset.num_users, dataset.num_items
-    test_eval_pos, test_eval_target, eval_neg_candidates = dataset.test_data()
-    test_evaluator = Evaluator(test_eval_pos, test_eval_target, eval_neg_candidates, **config['Evaluator'], num_users=num_users, num_items=num_items, item_id = dataset.item_id_dict)
+
+    ###
+    test_eval_pos, test_eval_target, vali_eval_target, eval_neg_candidates = dataset.test_data()
+    # test_evaluator = Evaluator(test_eval_pos, test_eval_target, eval_neg_candidates, **config['Evaluator'], num_users=num_users, num_items=num_items, item_id = dataset.item_id_dict)
+    test_evaluator = Evaluator(test_eval_pos, test_eval_target, vali_eval_target, eval_neg_candidates, **config['Evaluator'], num_users=num_users, num_items=num_items, item_id=None)
 
     # early stop
     early_stop = EarlyStop(**config['EarlyStop'])
@@ -74,15 +79,16 @@ if __name__ == '__main__':
     import model
     MODEL_CLASS = getattr(model, model_name)
 
-    seed = config.get_param('Experiment', 'seed')
+    # seed = config.get_param('Experiment', 'seed')
 
     # build model
-    set_random_seed(seed)
+    # set_random_seed(seed)
 
     model = MODEL_CLASS(dataset, config['Model'], device)
 
     # train
     test_score, train_time = train_model(model, dataset, test_evaluator, early_stop, logger, config)
+    # test_score, train_time = train_model(model, dataset, early_stop, logger, config)
 
     m, s = divmod(train_time, 60)
     h, m = divmod(m, 60)
@@ -97,7 +103,7 @@ if __name__ == '__main__':
     logger.info("Saved to %s" % (log_dir))
 
     # Extract global model
-    if 'LOCA' not in model_name and model_name != 'MF' and model_name != 'MOE':
+    if 'LOCA' not in model_name and model_name != 'MF' and model_name != 'MOE' and model_name != 'WL':
         output = model.get_output(dataset)
 
         output_dir = os.path.join(dataset.data_dir, dataset.data_name, 'output')
@@ -121,3 +127,7 @@ if __name__ == '__main__':
             pickle.dump(user_embedding, f, protocol=4)
         config.save(emb_dir)
         print(f"{model_name} embedding extracted!")
+
+    # del model
+    # gc.collect()
+    # torch.cuda.empty_cache()

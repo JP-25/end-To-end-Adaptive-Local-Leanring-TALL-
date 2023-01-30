@@ -11,6 +11,9 @@ from torch.autograd import Variable
 from base.BaseRecommender import BaseRecommender
 from dataloader.DataBatcher import DataBatcher
 from utils import Tool
+from utils import MP_Utility
+from experiment import EarlyStop
+from time import strftime
 
 
 class MultVAE(BaseRecommender):
@@ -40,6 +43,14 @@ class MultVAE(BaseRecommender):
 
         self.device = device
         self.best_params = None
+        self.es = EarlyStop(10, 'mean')
+
+        # similarity_dir = os.path.join(dataset.data_dir, dataset.data_name, 'mainstream_scores')
+        # similarity_file = os.path.join(similarity_dir, 'MS_similarity.npy')
+        # self.ms = np.load(similarity_file)
+        # weight_temp = self.ms / np.max(self.ms)
+        # self.weight = (1 / weight_temp)
+        self.time = strftime('%Y%m%d-%H%M')
 
         self.build_graph()
 
@@ -63,6 +74,9 @@ class MultVAE(BaseRecommender):
 
         # Send model to device (cpu or gpu)
         self.to(self.device)
+        # for name, param in self.named_parameters():
+        #     if param.requires_grad:
+        #         print(param)
 
     def forward(self, x):
         # encoder
@@ -106,14 +120,19 @@ class MultVAE(BaseRecommender):
         
         train_matrix = dataset.train_matrix.toarray()
         train_matrix = torch.FloatTensor(train_matrix)
+        # best_result = 0.0
+        # best_epoch = -1
 
         # for epoch
         start = time()
         for epoch in range(1, num_epochs + 1):
+            # if epoch - best_epoch > 10:
+            #     break
             self.train()
 
             epoch_loss = 0.0
-            batch_loader = DataBatcher(users, batch_size=self.batch_size, drop_remain=False, shuffle=False)
+
+            batch_loader = DataBatcher(users, batch_size=self.batch_size, drop_remain=False, shuffle=True)
             num_batches = len(batch_loader)
             # ======================== Train
             epoch_train_start = time()
@@ -126,6 +145,9 @@ class MultVAE(BaseRecommender):
                     self.anneal = self.anneal_cap
 
                 batch_loss = self.train_model_per_batch(batch_matrix)
+                # weighted loss
+                # batch_weight = torch.FloatTensor(self.weight[batch_idx]).to(self.device)
+                # batch_loss = self.train_model_per_batch(batch_matrix, batch_weight)
                 epoch_loss += batch_loss
 
                 if verbose and (b + 1) % verbose == 0:
@@ -140,11 +162,33 @@ class MultVAE(BaseRecommender):
                 # evaluate model
                 epoch_eval_start = time()
 
-                test_score = evaluator.evaluate(self)
-                test_score_str = ['%s=%.4f' % (k, test_score[k]) for k in test_score]
+                # Rec = self.predict_all()
+                # # precision, recall, f_score, ndcg = MP_Utility.MP_test_model_all(Rec, dataset.vali_like, dataset.train_like,
+                # #                                                              n_workers=10)
+                # precision, recall, f_score, ndcg = MP_Utility.MP_test_model_all(Rec, dataset.vali_like, dataset.train_like, n_workers=10)
+                # MP_Utility.MP_test_model_all(Rec, dataset.test_like, dataset.train_like, n_workers=10)
+                # if np.mean(ndcg) > best_result:
+                #     best_epoch = epoch
+                #     best_result = np.mean(ndcg)
+                #     torch.save(self.state_dict(), os.path.join(log_dir, 'best_model.p'))
+                #
+                #     if self.anneal_cap == 1: print(self.anneal)
+                #
+                #     similarity_dir = os.path.join(self.dataset.data_dir, self.dataset.data_name, 'mainstream_scores')
+                #     similarity_file = os.path.join(similarity_dir, 'MultVAE_scores')
+                #     if not os.path.exists(similarity_file):
+                #         os.mkdir(similarity_file)
+                #     with open(os.path.join(similarity_file, 'test_scores.npy'), 'wb') as f:
+                #         np.save(f, Rec.astype(np.float16))
 
+                test_score = evaluator.evaluate_vali(self)
+                # test_score_str = ['%s=%.4f' % (k, test_score[k]) for k in test_score]
+                # test_score_str = ['%s=[%s]' % (k, test_score[k]) for k in test_score]
                 updated, should_stop = early_stop.step(test_score, epoch)
 
+                test_score_output = evaluator.evaluate(self)
+                test_score_str = ['%s=%.4f' % (k, test_score_output[k]) for k in test_score_output]
+                _, _ = self.es.step(test_score_output, epoch)
                 if should_stop:
                     logger.info('Early stop triggered.')
                     break
@@ -152,6 +196,17 @@ class MultVAE(BaseRecommender):
                     # save best parameters
                     if updated:
                         torch.save(self.state_dict(), os.path.join(log_dir, 'best_model.p'))
+                        # save scores for all users
+                        # rec = self.predict_all()
+                        ndcg_test_all = evaluator.evaluate(self, mean=False)
+                        similarity_dir = os.path.join(self.dataset.data_dir, self.dataset.data_name,
+                                                      'mainstream_scores')
+                        similarity_file = os.path.join(similarity_dir, 'MultVAE_scores')
+                        if not os.path.exists(similarity_file):
+                            os.mkdir(similarity_file)
+                        with open(os.path.join(similarity_file, self.time + '_vae_scores.npy'), 'wb') as f:
+                            np.save(f, ndcg_test_all)
+
                         if self.anneal_cap == 1: print(self.anneal)
 
                 epoch_eval_time = time() - epoch_eval_start
@@ -159,6 +214,7 @@ class MultVAE(BaseRecommender):
 
                 epoch_info += ['epoch time=%.2f (%.2f + %.2f)' % (epoch_time, epoch_train_time, epoch_eval_time)]
                 epoch_info += test_score_str
+                # epoch_info += ['ndcg@20= ' + str(ndcg[3])]
             else:
                 epoch_info += ['epoch time=%.2f (%.2f + 0.00)' % (epoch_train_time, epoch_train_time)]
 
@@ -167,7 +223,9 @@ class MultVAE(BaseRecommender):
 
         total_train_time = time() - start
 
-        return early_stop.best_score, total_train_time
+        # return early_stop.best_score, total_train_time
+        return self.es.best_score, total_train_time
+        # return {'NDCG@20': ndcg[3]}, total_train_time
 
     def train_model_per_batch(self, batch_matrix, batch_weight=None):
         # zero grad
@@ -182,6 +240,7 @@ class MultVAE(BaseRecommender):
             ce_loss = -(F.log_softmax(output, 1) * batch_matrix).sum(1).mean()
         else:
             ce_loss = -((F.log_softmax(output, 1) * batch_matrix) * batch_weight.view(output.shape[0], -1)).sum(1).mean()
+            # ce_loss = -((F.log_softmax(output, 1) * batch_matrix).sum(1) * batch_weight).mean()
 
         loss = ce_loss + kl_loss * self.anneal
 
@@ -195,13 +254,26 @@ class MultVAE(BaseRecommender):
 
         return loss
 
+    # def predict_all(self):
+    #     R = self.predict_for_eval(np.arange(self.num_users))
+    #     return R
+    #
+    # def predict_for_eval(self, user_ids):
+    #     self.eval()
+    #     batch_eval_pos = self.dataset.train_matrix[user_ids]
+    #     with torch.no_grad():
+    #         eval_input = torch.Tensor(batch_eval_pos.toarray()).to(self.device)
+    #         eval_output = self.forward(eval_input).detach().cpu().numpy()
+    #     self.train()
+    #     return eval_output
+
     def predict(self, user_ids, eval_pos_matrix, eval_items=None):
         self.eval()
         batch_eval_pos = eval_pos_matrix[user_ids]
         with torch.no_grad():
             eval_input = torch.Tensor(batch_eval_pos.toarray()).to(self.device)
             eval_output = self.forward(eval_input).detach().cpu().numpy()
-            
+
             if eval_items is not None:
                 eval_output[np.logical_not(eval_items)]=float('-inf')
             else:
@@ -237,7 +309,7 @@ class MultVAE(BaseRecommender):
         return user_embedding.detach().cpu().numpy()
 
     def get_output(self, dataset):
-        test_eval_pos, test_eval_target, _ = dataset.test_data()
+        test_eval_pos, test_eval_target, _, _ = dataset.test_data()
         num_users = len(test_eval_target)
         num_items = test_eval_pos.shape[1]
         eval_users = np.arange(num_users)

@@ -27,16 +27,16 @@ class BaseDataset:
         # self.mf_file_prefix = self.generate_file_prefix_mf()
         self.data_file = self.file_prefix + '.data'
         self.info_file = self.file_prefix + '.info'
-        self.MF_info = self.file_prefix + '.pkl'
+        # self.MF_info = self.file_prefix + '.pkl'
         self.separator = CONSTANT.DATASET_TO_SEPRATOR[dataset]
 
         if not self.check_dataset_exists():
             print('preprocess raw data...')
-            preprocess(self.raw_file, self.file_prefix, self.leave_k, self.min_item_per_user, self.min_user_per_item,
+            preprocess(self.raw_file, self.file_prefix, prefix, self.leave_k, self.min_item_per_user, self.min_user_per_item,
                        self.separator, self.popularity_order)
 
     def check_dataset_exists(self):
-        return os.path.exists(self.data_file) and os.path.exists(self.info_file) and os.path.exists(self.MF_info)
+        return os.path.exists(self.data_file) and os.path.exists(self.info_file)
 
     def generate_file_prefix(self):
         split = 'fixed'
@@ -46,7 +46,7 @@ class BaseDataset:
 
         sub_directory = []
         sub_directory.append('_mincnt_%d_%d' % (self.min_user_per_item, self.min_item_per_user))
-        sub_directory.append('_k_%d' % self.leave_k)
+        # sub_directory.append('_k_%d' % self.leave_k)
 
         sub_directory = os.path.join(base_directory, '_'.join(sub_directory))
         if not os.path.exists(sub_directory):

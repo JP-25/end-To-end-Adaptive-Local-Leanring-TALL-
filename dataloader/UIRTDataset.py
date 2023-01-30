@@ -13,19 +13,23 @@ class UIRTDatset(BaseDataset):
     def __init__(self, data_dir, dataset, min_user_per_item=1, min_item_per_user=1, leave_k=5, popularity_order=True):
         super(UIRTDatset, self).__init__(data_dir, dataset, min_user_per_item, min_item_per_user, leave_k, popularity_order)
 
-        self.train_matrix, self.test_dict, self.user_id_dict, self.user_to_num_items, self.item_id_dict, self.item_to_num_users, self.train_df \
+        # self.train_matrix, self.test_dict, self.user_id_dict, self.user_to_num_items, self.item_id_dict, self.item_to_num_users, self.train_df \
+        #     = load_data_and_info(self.data_file, self.info_file)
+
+        self.train_matrix, self.test_dict, self.vali_dict, self.num_users, self.num_items, self.train_df\
             = load_data_and_info(self.data_file, self.info_file)
 
         print("data loaded!")
 
-        self.num_users = len(self.user_id_dict)
-        self.num_items = len(self.item_id_dict)
+        # self.num_users = len(self.user_id_dict)
+        # self.num_items = len(self.item_id_dict)
         self.eval_neg_candidates = None
 
     def test_data(self):
         eval_pos = self.train_matrix
         eval_target = self.test_dict
-        return eval_pos, eval_target, self.eval_neg_candidates
+        vali_target = self.vali_dict
+        return eval_pos, eval_target, vali_target, self.eval_neg_candidates
 
 
     def __str__(self):

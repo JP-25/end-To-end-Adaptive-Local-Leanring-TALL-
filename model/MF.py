@@ -12,7 +12,7 @@ from torch import linalg as LA
 from base.BaseRecommender import BaseRecommender
 from dataloader.DataBatcher import DataBatcher
 from utils import Tool
-from utils import MF_Utility
+from utils import MP_Utility
 
 import copy
 from past.builtins import range
@@ -25,8 +25,8 @@ from tqdm import tqdm
 
 from evaluation.backend import HoldoutEvaluator
 
-np.random.seed(0)
-torch.manual_seed(0)
+# np.random.seed(0)
+# torch.manual_seed(0)
 
 
 class MF(BaseRecommender):
@@ -50,7 +50,7 @@ class MF(BaseRecommender):
         self.train_df = dataset.train_df
         # self.train_like = dataset.train_like
         # self.test_like = dataset.test_like
-        self.user_list, self.item_list, self.label_list = MF_Utility.negative_sampling(self.num_users, self.num_items,
+        self.user_list, self.item_list, self.label_list = MP_Utility.negative_sampling(self.num_users, self.num_items,
                                                                                     self.train_df[0],
                                                                                     self.train_df[1],
                                                                                     self.neg_sample_rate)
@@ -132,7 +132,7 @@ class MF(BaseRecommender):
         epoch_cost = 0.
         epoch_cost1 = 0.
         epoch_cost2 = 0.
-        self.user_list, self.item_list, self.label_list = MF_Utility.negative_sampling(self.num_users, self.num_items,
+        self.user_list, self.item_list, self.label_list = MP_Utility.negative_sampling(self.num_users, self.num_items,
                                                                                     self.train_df[0],
                                                                                     self.train_df[1],
                                                                                     self.neg_sample_rate)

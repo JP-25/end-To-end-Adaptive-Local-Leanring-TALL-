@@ -14,7 +14,7 @@ from torch.autograd import Variable
 from concurrent import futures
 from base.BaseRecommender import BaseRecommender
 from dataloader.DataBatcher import DataBatcher
-from utils import Logger, set_random_seed
+from utils import Logger#, set_random_seed
 from sklearn.cluster import KMeans
 from collections import OrderedDict
 from tqdm import tqdm
