@@ -109,7 +109,7 @@ Before running LOCA, you need (1) user embeddings to find local communities and 
 ---
 
 ## Requirements
-- Python 3 or higher
+- Python 3.7 or higher
 - Torch 1.5 or higher
 
 ## Citation
