@@ -84,17 +84,13 @@ class MOE(BaseRecommender):
 
         self.time = strftime('%Y%m%d-%H%M')
         self.vali_batch = None
-        self.vali_batch_cuda = None
 
     def forward(self, x, batch_idx):
         n = x.shape[0]
         expert_output_list = []
         kl_loss_list = []
         dimension = 0
-        ### for checking
-        vali_acc = None
         loss = None
-        dis_pre = None
         # loss = []
 
         self.vali_batch = torch.FloatTensor(self.vali_).to(self.device)[batch_idx] ###
@@ -420,7 +416,7 @@ class MultVAE_Expert(BaseRecommender):
     #     self.eval()
     #     batch_eval_pos = eval_pos_matrix[user_ids]
     #     with torch.no_grad():
-    #         eval_input = torch.Tensor(batch_eval_pos.toarray()).to(self.device)
+    #         eval_input = torcsh.Tensor(batch_eval_pos.toarray()).to(self.device)
     #         eval_output = self.forward(eval_input).detach().cpu().numpy()
     #
     #         if eval_items is not None:
