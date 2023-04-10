@@ -1,5 +1,6 @@
-# MOE with MultVAE as Expert
-Inspired by LOCA idea and Fight Mainstream Bias <br>
+# end-To-end Adaptive Local Learning (TALL)
+## MoE with MultVAE as Expert
+Inspired by LOCA idea and Fight Mainstream Bias via Local Fine Tuning. <br>
 
 Original LOCA GitHub link is [here](https://github.com/jin530/LOCA).
 
@@ -23,41 +24,22 @@ The slides can be found [here](https://www.slideshare.net/ssuser1f2162/local-col
     <th class="tg-dvpl"># Items</th>
     <th class="tg-dvpl"># Ratings</th>
     <th class="tg-dvpl">Sparsity</th>
-    <th class="tg-dvpl">Concentration</th>
   </tr>
 </thead>
 <tbody>
   <tr>
-    <td class="tg-0pky">ML10M</td>
-    <td class="tg-dvpl">69,878</td>
-    <td class="tg-dvpl">10,677</td>
-    <td class="tg-dvpl">10,000,054</td>
-    <td class="tg-dvpl">98.66%</td>
-    <td class="tg-dvpl">48.04%</td>
+    <td class="tg-0pky">ML1M</td>
+    <td class="tg-dvpl">6,040</td>
+    <td class="tg-dvpl">3,952</td>
+    <td class="tg-dvpl">1,000,209</td>
+    <td class="tg-dvpl">95.81%</td>
   </tr>
   <tr>
-    <td class="tg-0pky">ML20M</td>
-    <td class="tg-dvpl">138,493</td>
-    <td class="tg-dvpl">26,744</td>
-    <td class="tg-dvpl">20,000,263</td>
-    <td class="tg-dvpl">99.46%</td>
-    <td class="tg-dvpl">66.43%</td>
-  </tr>
-  <tr>
-    <td class="tg-0pky">AMusic</td>
-    <td class="tg-dvpl">4,964</td>
-    <td class="tg-dvpl">11,797</td>
-    <td class="tg-dvpl">97,439</td>
-    <td class="tg-dvpl">99.83%</td>
-    <td class="tg-dvpl">14.93%</td>
-  </tr>
-  <tr>
-    <td class="tg-0pky">AGames</td>
-    <td class="tg-dvpl">13,063</td>
-    <td class="tg-dvpl">17,408</td>
-    <td class="tg-dvpl">236,415</td>
-    <td class="tg-dvpl">99.90%</td>
-    <td class="tg-dvpl">16.40%</td>
+    <td class="tg-0pky">Amazon CDs-Vinyl</td>
+    <td class="tg-dvpl">24,179</td>
+    <td class="tg-dvpl">27,602</td>
+    <td class="tg-dvpl">4,543,369</td>
+    <td class="tg-dvpl">99.32%</td>
   </tr>
   <tr>
     <td class="tg-0pky">Yelp</td>
@@ -65,14 +47,11 @@ The slides can be found [here](https://www.slideshare.net/ssuser1f2162/local-col
     <td class="tg-dvpl">25,815</td>
     <td class="tg-dvpl">731,671</td>
     <td class="tg-dvpl">99.89%</td>
-    <td class="tg-dvpl">22.78%</td>
   </tr>
 </tbody>
 </table>
 <br>
-I used five public benchmark datasets as the original LOCA: MovieLens 10M (ML10M), MovieLens 20M (ML20M), Amazon Digital Music (AMusic), Amazon Video Games (AGames), and Yelp 2015 (Yelp) datasets. We convert all explicit ratings to binary values, whether the ratings are observed or missing. For the MovieLens datasets, we did not modify the original data except for binarization. For the Amazon datasets, We removed users with ratings less than
-10, resulting in 97,439 (Music) and 236,415 (Games) ratings. For the Yelp dataset, we pre-processed Yelp 2015 challenge dataset as in <A href='https://github.com/hexiangnan/sigir16-eals'> Fast Matrix Factorization for Online Recommendation with Implicit Feedback </A>, where users and items with less than 10 interactions are
-removed.
+I uploaded one public benchmark datasets code sample here: MovieLens 1M (ML1M). You can find other datasets and run them in this code. We convert all explicit ratings to binary values, whether the ratings are observed or missing, some example datasets are listed in the table above.
 <br>
 <br>
 
@@ -95,16 +74,19 @@ Yelp 2015: https://github.com/hexiangnan/sigir16-eals/tree/master/data
 
 For example: ```python main.py --model_name MultVAE --lr 0.001```
 
-## Running LOCA and MOE
+## Running LOCA
 Before running LOCA, you need (1) user embeddings to find local communities and (2) the global model to cover users who are not considered by local models. </br>
 
-1. Run single MultVAE and EASE to get user embedding vectors and the global model: 
+1. Run single MultVAE to get user embedding vectors and the global model: 
 
 `python main.py --model_name MultVAE` 
 
 2. Train LOCA with the specific backbone model:
 
-`python main.py --model_name LOCA_VAE` and `python main.py --model_name MOE` 
+`python main.py --model_name LOCA_VAE` 
+
+## Running TALL (MoE)
+`python main.py --model_name MOE`
 
 ---
 
@@ -131,5 +113,13 @@ cited papaer:
   timestamp = {Wed, 07 Apr 2021 16:17:44 +0200},
   biburl    = {https://dblp.org/rec/conf/wsdm/ChoiJLL21.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{zhu2022fighting,
+  title={Fighting mainstream bias in recommender systems via local fine tuning},
+  author={Zhu, Ziwei and Caverlee, James},
+  booktitle={Proceedings of the Fifteenth ACM International Conference on Web Search and Data Mining},
+  pages={1497--1506},
+  year={2022}
 }
 ```
