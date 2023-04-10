@@ -43,13 +43,13 @@ class WL(BaseRecommender):
 
         self.device = device
         self.best_params = None
-        self.es = EarlyStop(10, 'mean')
+        # self.es = EarlyStop(10, 'mean')
 
         similarity_dir = os.path.join(dataset.data_dir, dataset.data_name, 'mainstream_scores')
         similarity_file = os.path.join(similarity_dir, 'MS_similarity.npy')
         self.ms = -np.load(similarity_file)
         self.weight = self.ms - np.min(self.ms)
-        self.weight = (self.weight / np.max(self.weight)) ** 1.5
+        self.weight = (self.weight / np.max(self.weight)) ** 1.2 # 1.5 and 3
         self.weight = self.weight / np.mean(self.weight)
         # weight_temp = self.ms / np.max(self.ms)
         # self.weight = (1 / weight_temp)
@@ -120,6 +120,7 @@ class WL(BaseRecommender):
 
         train_matrix = dataset.train_matrix.toarray()
         train_matrix = torch.FloatTensor(train_matrix)
+        best_result = None
 
         # for epoch
         start = time()
@@ -152,6 +153,10 @@ class WL(BaseRecommender):
 
             epoch_info = ['epoch=%3d' % epoch, 'loss=%.3f' % epoch_loss, 'train time=%.2f' % epoch_train_time]
 
+            similarity_dir = os.path.join(self.dataset.data_dir, self.dataset.data_name, 'mainstream_scores')
+            if not os.path.exists(similarity_dir):
+                os.mkdir(similarity_dir)
+
             # ======================== Evaluate
             if (epoch >= test_from and epoch % test_step == 0) or epoch == num_epochs:
                 self.eval()
@@ -163,7 +168,7 @@ class WL(BaseRecommender):
 
                 test_score_output = evaluator.evaluate(self)
                 test_score_str = ['%s=%.4f' % (k, test_score_output[k]) for k in test_score_output]
-                _, _ = self.es.step(test_score_output, epoch)
+                # _, _ = self.es.step(test_score_output, epoch)
                 if should_stop:
                     logger.info('Early stop triggered.')
                     break
@@ -173,9 +178,10 @@ class WL(BaseRecommender):
                         torch.save(self.state_dict(), os.path.join(log_dir, 'best_model.p'))
                         # save scores for all users
                         # rec = self.predict_all()
+                        best_result = test_score_output
                         ndcg_test_all = evaluator.evaluate(self, mean=False)
-                        similarity_dir = os.path.join(self.dataset.data_dir, self.dataset.data_name,
-                                                      'mainstream_scores')
+                        # similarity_dir = os.path.join(self.dataset.data_dir, self.dataset.data_name,
+                        #                               'mainstream_scores')
                         similarity_file = os.path.join(similarity_dir, 'MultVAE_wl_scores')
                         if not os.path.exists(similarity_file):
                             os.mkdir(similarity_file)
@@ -199,7 +205,8 @@ class WL(BaseRecommender):
         total_train_time = time() - start
 
         # return early_stop.best_score, total_train_time
-        return self.es.best_score, total_train_time
+        # return self.es.best_score, total_train_time
+        return best_result, total_train_time
         # return {'NDCG@20': ndcg[3]}, total_train_time
 
     def train_model_per_batch(self, batch_matrix, batch_weight=None):
@@ -216,8 +223,8 @@ class WL(BaseRecommender):
         else:
             # original
             # ce_loss = -((F.log_softmax(output, 1) * batch_matrix) * batch_weight.view(output.shape[0], -1)).sum(1).mean()
-            # ce_loss = -((F.log_softmax(output, 1) * batch_matrix).sum(1) * batch_weight).sum() / batch_weight.sum()
-            ce_loss = -((F.log_softmax(output, 1) * batch_matrix) * batch_weight.view(output.shape[0], -1)).sum(1).sum() / batch_weight.sum()
+            ce_loss = -((F.log_softmax(output, 1) * batch_matrix).sum(1) * batch_weight).sum() / batch_weight.sum() # based on paper
+            # ce_loss = -((F.log_softmax(output, 1) * batch_matrix) * batch_weight.view(output.shape[0], -1)).sum(1).sum() / batch_weight.sum() # correct version
 
         loss = ce_loss + kl_loss * self.anneal
 

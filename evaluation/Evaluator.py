@@ -88,26 +88,73 @@ class Evaluator:
         model.train()
         return scores
 
-    # def evaluate_all_ndcg(self, model):
-    #     # Switch to eval mode
-    #     # model.eval()
-    #
-    #     # eval users
-    #     eval_users = list(self.eval_target.keys())
-    #
-    #     ndcg_scores = None
-    #
-    #     # need refactoring
-    #     batch_eval_target = {u: self.eval_target[u] for u in eval_users}
-    #     #   make prediction
-    #     batch_pred = model.predict(eval_users, self.eval_pos)
-    #
-    #     # compute metrics
-    #     batch_topk = predict_topk(batch_pred.astype(np.float32), self.max_k).astype(np.int64)
-    #     ndcg_scores = self.eval_runner.compute_metrics_for_all_ndcg(batch_topk, batch_eval_target, ndcg_scores)
-    #     # return
-    #     # model.train()
-    #     return ndcg_scores
+    # print out all ndcg and keep ndcg mean final results
+    def evaluate_vali_MOE(self, model):
+        # Switch to eval mode
+        model.eval()
+
+        # eval users
+        eval_users = list(self.vali_target.keys())
+        user_iterator = DataBatcher(eval_users, batch_size=self.batch_size)
+        score_cumulator = None
+
+        for batch_user_ids in user_iterator:
+            # need refactoring
+            batch_eval_target = {u: self.vali_target[u] for u in batch_user_ids}
+            #   make prediction
+            batch_pred = model.predict(batch_user_ids, self.eval_pos)
+
+            # compute metrics
+            batch_topk = predict_topk(batch_pred.astype(np.float32), self.max_k).astype(np.int64)
+            score_cumulator = self.eval_runner_vali.compute_metrics(batch_topk, batch_eval_target, score_cumulator)
+        scores_mean = {}
+        scores_all = {}
+        for metric in score_cumulator:
+            score_by_ks = score_cumulator[metric]
+            for k in score_by_ks:
+                scores_mean['%s@%d' % (metric, k)] = score_by_ks[k].mean
+                scores_all['%s@%d' % (metric, k)] = score_by_ks[k].history
+        # return
+        model.train()
+        return scores_mean, scores_all
+
+    ## for validation set partial
+    def evaluate_partial_vali(self, model, candidate_users=None, mean=True):
+        if candidate_users is None:
+            print('Candidate users are not privided. Evaluate on all users')
+            return self.evaluate(model)
+
+        # Switch to eval mode
+        model.eval()
+
+        # eval users
+        # eval_users = list(self.vali_target.keys())
+        # user_iterator = DataBatcher(eval_users, batch_size=self.batch_size)
+        score_cumulator = None
+        eval_users = candidate_users
+        user_iterator = DataBatcher(eval_users, batch_size=self.batch_size)
+
+
+        for batch_user_ids in user_iterator:
+            # need refactoring
+            batch_eval_target = {u: self.vali_target[u] for u in batch_user_ids}
+            #   make prediction
+            batch_pred = model.predict(batch_user_ids, self.eval_pos)
+
+            # compute metrics
+            batch_topk = predict_topk(batch_pred.astype(np.float32), self.max_k).astype(np.int64)
+            score_cumulator = self.eval_runner_vali.compute_metrics(batch_topk, batch_eval_target, score_cumulator)
+        scores = {}
+        for metric in score_cumulator:
+            score_by_ks = score_cumulator[metric]
+            for k in score_by_ks:
+                if mean:
+                    scores['%s@%d' % (metric, k)] = score_by_ks[k].mean
+                else:
+                    scores['%s@%d' % (metric, k)] = score_by_ks[k].history
+        # return
+        model.train()
+        return scores
 
     def evaluate_partial(self, model, candidate_users=None, mean=True):
         if candidate_users is None:

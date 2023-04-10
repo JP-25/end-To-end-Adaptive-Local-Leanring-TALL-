@@ -12,6 +12,8 @@ import torch.multiprocessing as multiprocessing
 import utils.Constant as CONSTANT
 from dataloader import UIRTDatset
 from evaluation import Evaluator
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel
 
 import warnings
 import gc
@@ -19,7 +21,6 @@ import gc
 warnings.filterwarnings("ignore")
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-# os.environ['TF_FORCE_GPU_ALLOW_GROWTH']='true'
 
 if __name__ == '__main__':
     multiprocessing.set_start_method('spawn')
@@ -43,12 +44,9 @@ if __name__ == '__main__':
     gpu = config.get_param('Experiment', 'gpu')
     gpu = str(gpu)
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu
-    # torch.cuda.empty_cache()
-    # torch.backends.cudnn.benchmark = True
-    # torch.backends.cudnn.enabled = True
+    # os.environ["CUDA_DEVICE_ORDER"] = "0, 1"
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # device = torch.device("cpu")
     model_name = config.get_param('Experiment', 'model_name')
 
     # logger
@@ -66,7 +64,6 @@ if __name__ == '__main__':
 
     ###
     test_eval_pos, test_eval_target, vali_eval_target, eval_neg_candidates = dataset.test_data()
-    # test_evaluator = Evaluator(test_eval_pos, test_eval_target, eval_neg_candidates, **config['Evaluator'], num_users=num_users, num_items=num_items, item_id = dataset.item_id_dict)
     test_evaluator = Evaluator(test_eval_pos, test_eval_target, vali_eval_target, eval_neg_candidates, **config['Evaluator'], num_users=num_users, num_items=num_items, item_id=None)
 
     # early stop
@@ -88,7 +85,6 @@ if __name__ == '__main__':
 
     # train
     test_score, train_time = train_model(model, dataset, test_evaluator, early_stop, logger, config)
-    # test_score, train_time = train_model(model, dataset, early_stop, logger, config)
 
     m, s = divmod(train_time, 60)
     h, m = divmod(m, 60)
@@ -127,7 +123,3 @@ if __name__ == '__main__':
             pickle.dump(user_embedding, f, protocol=4)
         config.save(emb_dir)
         print(f"{model_name} embedding extracted!")
-
-    # del model
-    # gc.collect()
-    # torch.cuda.empty_cache()

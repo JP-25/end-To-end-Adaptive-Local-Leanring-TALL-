@@ -37,14 +37,17 @@ class EarlyStop:
                 self.best_score = score
                 self.best_epoch = epoch
                 self.best_score_mean = np.mean(list(self.best_score.values()))
+                # do not need the last parameter
+                # self.best_score_mean = np.mean(list(self.best_score.values())[:-1])
                 not_updated = False
             else:
                 not_updated = True
-                # print(np.mean(list(score.values())))
                 if np.mean(list(score.values())) > self.best_score_mean:
+                # if np.mean(list(score.values())[:-1]) > self.best_score_mean:
                     self.best_score = score
                     self.best_epoch = epoch
                     self.best_score_mean = np.mean(list(self.best_score.values()))
+                    # self.best_score_mean = np.mean(list(self.best_score.values())[:-1])
                     not_updated = False
         else:
             # Early stop if specific measure doesn't improve

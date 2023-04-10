@@ -4,6 +4,8 @@ from scipy.sparse.csr import csr_matrix
 from tqdm import tqdm
 import pickle
 from datetime import datetime
+import json
+from scipy.io import loadmat
 
 import numpy as np
 import scipy.sparse as sp
@@ -14,32 +16,47 @@ from collections import defaultdict
 
 def read_raw_random(datapath, file_prefix, separator, prefix):
     # here is training and testing split preprocess
-    rating_df = pd.read_csv(datapath, sep=separator, names=["userId", "itemId", "rating", "timestamp"],
-                            engine='python')
-    rating_df.drop(columns=['timestamp'], inplace=True)
-    rating_df.drop(columns=['rating'], inplace=True)
-    # rating_df.head()
-    # print(len(rating_df))
-    rating_df.drop_duplicates(subset=['itemId', 'userId'],
-                              keep='first', inplace=True)
+    if datapath[-10:] == "rating.mat":
+        rating = loadmat(datapath)
+        rating = rating['rating']
+        rating_df = pd.DataFrame({'userId': rating[:, 0], 'itemId': rating[:, 1], 'rating': rating[:, 3]})
+        rating_df.drop(columns=['rating'], inplace=True)
+    else:
+        rating_df = pd.read_csv(datapath, sep=separator, names=["userId", "itemId", "rating", "timestamp"], engine='python')
+        rating_df.drop(columns=['timestamp'], inplace=True)
+        rating_df.drop(columns=['rating'], inplace=True)
+        print(len(rating_df))
+    rating_df.drop_duplicates(subset=['itemId', 'userId'], keep='first', inplace=True)
     item_set = set(rating_df['itemId'].unique())
     user_set = set(rating_df['userId'].unique())
     rating_df.reset_index(drop=True, inplace=True)
     rdf_backup = copy.copy(rating_df)
     rdf = copy.copy(rdf_backup)
-    # iteratively remove items and users with less than 10 reviews
+
+    print("initial: ", len(user_set), len(item_set))
+
     rdf['user_freq'] = rdf.groupby('userId')['userId'].transform('count')
     rdf['item_freq'] = rdf.groupby('itemId')['itemId'].transform('count')
+
+    # ml-1m (9,9,9), yelp(8,8,19),  epinion(11, 11, 11), kindle_store(16, 16, 23), CDs(9, 9, 15)
     while np.min(rdf['user_freq']) <= 9:
+        # iteratively remove items and users with less than 10 reviews (ml-1m),
         rdf.drop(rdf.index[rdf['user_freq'] <= 9], inplace=True)
         rdf.reset_index(drop=True, inplace=True)
+
         rdf['item_freq'] = rdf.groupby('itemId')['itemId'].transform('count')
         rdf.drop(rdf.index[rdf['item_freq'] <= 9], inplace=True)
         rdf.reset_index(drop=True, inplace=True)
+
         rdf['user_freq'] = rdf.groupby('userId')['userId'].transform('count')
         rdf.reset_index(drop=True, inplace=True)
+
     item_list = rdf['itemId'].unique()
     user_list = rdf['userId'].unique()
+    # print("here")
+    print(len(user_list), len(item_list))
+    print('sparsity: ' + str(len(rdf) * 1.0 / (len(user_list) * len(item_list))))
+
     # get the user and item str id->int id dict
     i = 0
     user_old2new_id_dict = dict()
@@ -175,7 +192,8 @@ def read_raw_random(datapath, file_prefix, separator, prefix):
 
     info_lines = []
     info_lines.append('# users: %d, # items: %d' % (num_users, num_items))
-    info_lines.append("Sparsity : %.2f%%" % (len(rdf) * 1.0 / (len(user_list) * len(item_list))))
+
+    info_lines.append("Sparsity : %.2f%%" % (len(rdf) * 100. / (len(user_list) * len(item_list))))
 
     with open(file_prefix + '.info', 'wt') as f:
         f.write('\n'.join(info_lines))
@@ -298,6 +316,8 @@ def preprocess(raw_file, file_prefix, prefix, leave_k, min_item_per_user=0, min_
     #
     # # preprocess
     # # preprocess_lko(U2IRT, user_id_dict, user_to_num_items, item_id_dict, item_to_num_users, file_prefix, leave_k)
+
+    # here instead of leave k, use traditional methods.
     read_raw_random(raw_file, file_prefix, separator, prefix)
 
 def preprocess_lko(U2IRT, user_id_dict, user_to_num_items, item_id_dict, item_to_num_users,  file_prefix, leave_k):

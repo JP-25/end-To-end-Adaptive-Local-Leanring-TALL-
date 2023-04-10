@@ -22,13 +22,23 @@ class BaseDataset:
         self.popularity_order = popularity_order
 
         prefix = os.path.join(self.data_dir, self.data_name, self.data_name)
-        self.raw_file = prefix + '.rating'
-        self.file_prefix = self.generate_file_prefix()
-        # self.mf_file_prefix = self.generate_file_prefix_mf()
-        self.data_file = self.file_prefix + '.data'
-        self.info_file = self.file_prefix + '.info'
-        # self.MF_info = self.file_prefix + '.pkl'
-        self.separator = CONSTANT.DATASET_TO_SEPRATOR[dataset]
+        epinion_prefix = os.path.join(self.data_dir, self.data_name, "rating")
+        if self.data_name == 'epinion':
+            self.raw_file = epinion_prefix + '.mat'
+            self.file_prefix = self.generate_file_prefix()
+            # self.mf_file_prefix = self.generate_file_prefix_mf()
+            self.data_file = self.file_prefix + '.data'
+            self.info_file = self.file_prefix + '.info'
+            # self.MF_info = self.file_prefix + '.pkl'
+            self.separator = CONSTANT.DATASET_TO_SEPRATOR[dataset]
+        else:
+            self.raw_file = prefix + '.rating'
+            self.file_prefix = self.generate_file_prefix()
+            # self.mf_file_prefix = self.generate_file_prefix_mf()
+            self.data_file = self.file_prefix + '.data'
+            self.info_file = self.file_prefix + '.info'
+            # self.MF_info = self.file_prefix + '.pkl'
+            self.separator = CONSTANT.DATASET_TO_SEPRATOR[dataset]
 
         if not self.check_dataset_exists():
             print('preprocess raw data...')

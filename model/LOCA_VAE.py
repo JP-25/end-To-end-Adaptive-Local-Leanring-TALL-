@@ -308,7 +308,7 @@ class LocalWrapper(BaseRecommender):
         self.test_weight = test_weight
         self.candidate_users = candidate_users
         self.local_model = self.build_model()
-        self.es = EarlyStop(10, 'mean')
+        # self.es = EarlyStop(10, 'mean')
 
         self.optimizer = self.local_model.optimizer
 
@@ -340,6 +340,8 @@ class LocalWrapper(BaseRecommender):
 
         # for each epoch
         start = time()
+        best_result = None
+
         for epoch in range(1, num_epochs + 1):
             self.train()
 
@@ -375,10 +377,12 @@ class LocalWrapper(BaseRecommender):
                 # evaluate model
                 epoch_eval_start = time()
 
-                test_score = evaluator.evaluate_partial(self, candidate_users=self.candidate_users)
-                test_score_str = ['%s=%.4f' % (k, test_score[k]) for k in test_score]
+                test_score = evaluator.evaluate_partial_vali(self, candidate_users=self.candidate_users)
+                # test_score_str = ['%s=%.4f' % (k, test_score[k]) for k in test_score]
 
                 updated, should_stop = early_stop.step(test_score, epoch)
+                test_score_output = evaluator.evaluate_partial(self, candidate_users=self.candidate_users)
+                test_score_str = ['%s=%.4f' % (k, test_score_output[k]) for k in test_score_output]
 
                 if should_stop:
                     logger.info('Early stop triggered.')
@@ -387,6 +391,7 @@ class LocalWrapper(BaseRecommender):
                     # save best parameters
                     if updated:
                         torch.save(self.local_model.state_dict(), os.path.join(log_dir, 'best_model.p'))
+                        best_result = test_score_output
 
                 epoch_eval_time = time() - epoch_eval_start
                 epoch_time = epoch_train_time + epoch_eval_time
@@ -401,7 +406,8 @@ class LocalWrapper(BaseRecommender):
 
         total_train_time = time() - start
 
-        return early_stop.best_score, total_train_time
+        # return early_stop.best_score, total_train_time
+        return best_result, total_train_time
 
     def predict(self, user_ids, eval_pos_matrix, eval_items=None):
         self.local_model.eval()
