@@ -1,9 +1,13 @@
 # MOE with MultVAE as Expert
-Inspired by LOCA idea <br>
+Inspired by LOCA idea and Fight Mainstream Bias <br>
 
 Original LOCA GitHub link is [here](https://github.com/jin530/LOCA).
 
+Original LFT and EnLFT code is [here](https://github.com/Zziwei/Measuring-Mitigating-Mainstream-Bias).
+
 This is the official code with preprocessed datasets for the WSDM 2021 paper: [`Local Collaborative Autoencoders`.](https://arxiv.org/abs/2103.16103)
+
+This is the offical code with preprocessed datasets for the WSDM 2022 paper: [`Fighting Mainstream Bias in Recommender Systems via LocalFine Tuning`.](https://dl.acm.org/doi/pdf/10.1145/3488560.3498427)
 
 The slides can be found [here](https://www.slideshare.net/ssuser1f2162/local-collaborative-autoencoders-wsdm2021).
 
@@ -105,7 +109,7 @@ Before running LOCA, you need (1) user embeddings to find local communities and 
 ---
 
 ## Requirements
-- Python 3 or higher
+- Python 3.7 or higher
 - Torch 1.5 or higher
 
 ## Citation
