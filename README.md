@@ -1,6 +1,6 @@
 # end-To-end Adaptive Local Learning (TALL)
 ## MoE with MultVAE as Expert
-Inspired by LOCA idea and Fight Mainstream Bias via Local Fine Tuning. <br>
+<!-- Inspired by LOCA idea and Fight Mainstream Bias via Local Fine Tuning. <br>
 
 Original LOCA GitHub link is [here](https://github.com/jin530/LOCA).
 
@@ -10,7 +10,7 @@ This is the official code with preprocessed datasets for the WSDM 2021 paper: [`
 
 This is the offical code with preprocessed datasets for the WSDM 2022 paper: [`Fighting Mainstream Bias in Recommender Systems via LocalFine Tuning`.](https://dl.acm.org/doi/pdf/10.1145/3488560.3498427)
 
-The slides can be found [here](https://www.slideshare.net/ssuser1f2162/local-collaborative-autoencoders-wsdm2021).
+The slides can be found [here](https://www.slideshare.net/ssuser1f2162/local-collaborative-autoencoders-wsdm2021). -->
 
 ---
 
@@ -93,3 +93,33 @@ Before running LOCA, you need (1) user embeddings to find local communities and 
 ## Requirements
 - Python 3.7 or higher
 - Torch 1.5 or higher
+
+<!-- ## Citation
+cited papaer:
+```
+@inproceedings{DBLP:conf/wsdm/ChoiJLL21,
+  author    = {Minjin Choi and
+               Yoonki Jeong and
+               Joonseok Lee and
+               Jongwuk Lee},
+  title     = {Local Collaborative Autoencoders},
+  booktitle = {{WSDM} '21, The Fourteenth {ACM} International Conference on Web Search
+               and Data Mining, Virtual Event, Israel, March 8-12, 2021},
+  pages     = {734--742},
+  publisher = {{ACM}},
+  year      = {2021},
+  url       = {https://doi.org/10.1145/3437963.3441808},
+  doi       = {10.1145/3437963.3441808},
+  timestamp = {Wed, 07 Apr 2021 16:17:44 +0200},
+  biburl    = {https://dblp.org/rec/conf/wsdm/ChoiJLL21.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{zhu2022fighting,
+  title={Fighting mainstream bias in recommender systems via local fine tuning},
+  author={Zhu, Ziwei and Caverlee, James},
+  booktitle={Proceedings of the Fifteenth ACM International Conference on Web Search and Data Mining},
+  pages={1497--1506},
+  year={2022}
+}
+``` -->
