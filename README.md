@@ -1,4 +1,4 @@
-# end-To-end Adaptive Local Learning (TALL)
+# end-**T**o-end **A**daptive **L**ocal **L**earning (**TALL**)
 ## MoE with MultVAE as Expert
 <!-- Inspired by LOCA idea and Fight Mainstream Bias via Local Fine Tuning. <br>
 
