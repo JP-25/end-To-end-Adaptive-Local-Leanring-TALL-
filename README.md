@@ -39,7 +39,7 @@ The slides can be found [here](https://www.slideshare.net/ssuser1f2162/local-col
     <td class="tg-dvpl">24,179</td>
     <td class="tg-dvpl">27,602</td>
     <td class="tg-dvpl">4,543,369</td>
-    <td class="tg-dvpl">99.32%</td>
+    <td class="tg-dvpl">99.93%</td>
   </tr>
   <tr>
     <td class="tg-0pky">Yelp</td>
