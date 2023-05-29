@@ -51,7 +51,6 @@ class MOE(BaseRecommender):
         self.dropout = model_conf['dropout']
         ### change weight decay
         self.reg = model_conf['reg'] / self.num_experts
-        # self.reg = model_conf['reg'] / (self.num_experts + 10000)
         print("weight decay:", self.reg)
         self.anneal = 0.
         self.anneal_cap = model_conf['anneal_cap']
