@@ -97,6 +97,8 @@ Before running LOCA, you need (1) user embeddings to find local communities and 
 - Python 3.7 or higher
 - Torch 1.5 or higher
 
+All models are implemented in PyTorch and optimized by the Adam algorithm. For the baseline MultVAE and the MultVAE component in other models, we set one hidden layer of size 100. In addition, for the TALL, we set the gap window $T$ to 40 with $\alpha=0.08$ for the ML1M; the gap window $T$ to 15 with $\alpha=0.6$ for Yelp; and the window gap $T$ to 25 with $\alpha=0.3$ for CDs\&Vinyl. These hyperparameters were tuned by the validation sets. And we set the number of experts in TALL as 100 for all datasets. Likewise, for LOCA and EnLFT, we maintain the number of anchor models at 100 to ensure a fair comparison.
+
 <!-- ## Citation
 cited papaer:
 ```
