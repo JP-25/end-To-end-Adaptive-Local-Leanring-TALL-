@@ -101,32 +101,15 @@ Before running LOCA, you need (1) user embeddings to find local communities and 
 ## Reproducibility
 All models are implemented in PyTorch and optimized by the Adam algorithm. For the baseline MultVAE and the MultVAE component in other models, we set one hidden layer of size 100. In addition, for the TALL, we set the gap window $T$ to 40 with $\alpha=0.08$ for the ML1M; the gap window $T$ to 15 with $\alpha=0.6$ for Yelp; and the window gap $T$ to 25 with $\alpha=0.3$ for CDs\&Vinyl. These hyperparameters were tuned by the validation sets. And we set the number of experts in TALL as 100 for all datasets. Likewise, for LOCA and EnLFT, we maintain the number of anchor models at 100 to ensure a fair comparison.
 
-<!-- ## Citation
+## Citation
 cited papaer:
 ```
-@inproceedings{DBLP:conf/wsdm/ChoiJLL21,
-  author    = {Minjin Choi and
-               Yoonki Jeong and
-               Joonseok Lee and
-               Jongwuk Lee},
-  title     = {Local Collaborative Autoencoders},
-  booktitle = {{WSDM} '21, The Fourteenth {ACM} International Conference on Web Search
-               and Data Mining, Virtual Event, Israel, March 8-12, 2021},
-  pages     = {734--742},
-  publisher = {{ACM}},
-  year      = {2021},
-  url       = {https://doi.org/10.1145/3437963.3441808},
-  doi       = {10.1145/3437963.3441808},
-  timestamp = {Wed, 07 Apr 2021 16:17:44 +0200},
-  biburl    = {https://dblp.org/rec/conf/wsdm/ChoiJLL21.bib},
-  bibsource = {dblp computer science bibliography, https://dblp.org}
+@inproceedings{pan2024countering,
+  title={Countering Mainstream Bias via End-to-End Adaptive Local Learning},
+  author={Pan, Jinhao and Zhu, Ziwei and Wang, Jianling and Lin, Allen and Caverlee, James},
+  booktitle={European Conference on Information Retrieval},
+  pages={75--89},
+  year={2024},
+  organization={Springer}
 }
-
-@inproceedings{zhu2022fighting,
-  title={Fighting mainstream bias in recommender systems via local fine tuning},
-  author={Zhu, Ziwei and Caverlee, James},
-  booktitle={Proceedings of the Fifteenth ACM International Conference on Web Search and Data Mining},
-  pages={1497--1506},
-  year={2022}
-}
-``` -->
+```
