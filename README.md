@@ -51,10 +51,10 @@ The slides can be found [here](https://www.slideshare.net/ssuser1f2162/local-col
 </tbody>
 </table>
 
-The table contains the information of original non-preprocessed datasets.
+The table contains the information on original non-preprocessed datasets.
 <br>
 <br>
-I uploaded one public benchmark datasets code sample here: MovieLens 1M (ML1M). You can find other datasets and run them in this code. We convert all explicit ratings to binary values, whether the ratings are observed or missing, some example datasets are listed in the table above.
+I uploaded one public benchmark dataset code sample here: MovieLens 1M (ML1M). You can find other datasets and run them in this code. We convert all explicit ratings to binary values, whether the ratings are observed or missing, some example datasets are listed in the table above.
 <br>
 <br>
 
